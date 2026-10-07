@@ -1,0 +1,6 @@
+Title: Order cannot reserve the last units in stock
+
+A warehouse user reported that an order for the exact remaining stock is rejected. Example: an item has 10 units available and 4 already reserved. A request for the remaining 6 units returns false. A request for 5 units succeeds.
+
+Observed in the training environment with Python 3.12.
+No exception is shown.

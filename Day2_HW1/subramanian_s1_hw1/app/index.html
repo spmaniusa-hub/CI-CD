@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Meeting Cost Calculator — Sierra Trails Hiking Club</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --warning-bg: #fef3c7;
+      --warning-text: #92400e;
+      --danger: #dc2626;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 36px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+
+    /* Duration section */
+    .duration-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .duration-group label {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .input-minutes {
+      width: 140px;
+      padding: 10px 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-minutes:focus {
+      border-color: var(--primary);
+    }
+
+    /* Role rows table */
+    .roles-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+
+    .roles-table th {
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .role-row td {
+      padding: 8px 6px;
+      vertical-align: middle;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    .col-role { width: 44%; }
+    .col-people { width: 22%; }
+    .col-rate { width: 24%; }
+    .col-action { width: 10%; text-align: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e2e8f0;
+    }
+
+    .btn-danger-icon {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .btn-danger-icon:hover {
+      color: var(--danger);
+      background-color: #fee2e2;
+    }
+
+    /* Results Dashboard */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .result-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .result-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .result-box.highlight {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .result-box.highlight .result-value {
+      color: var(--primary);
+    }
+
+    /* Alerts and Messages */
+    .notice {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .notice.warning {
+      display: block;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid #fcd34d;
+    }
+
+    .notice.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+    }
+
+    /* Live Ticker Mode (Bonus Challenge) */
+    .live-mode-card {
+      margin-top: 20px;
+      padding: 18px 20px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .live-title {
+      font-weight: 700;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    .live-cost {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #15803d;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .results-grid { grid-template-columns: 1fr; }
+      .role-row td { display: block; width: 100%; padding: 4px 0; }
+      .col-action { text-align: left; margin-bottom: 12px; }
+      .roles-table thead { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>The Meeting Cost Calculator</h1>
+      <p>Sierra Trails Hiking Club &bull; Real-time, exact-to-the-cent meeting pricing</p>
+    </header>
+
+    <div class="card">
+      <!-- Meeting Duration Input -->
+      <div class="duration-group">
+        <label for="meetingMinutes">Meeting Duration (Minutes):</label>
+        <input type="number" id="meetingMinutes" class="input-minutes" value="45" min="0" step="1">
+      </div>
+
+      <!-- Attendees Table -->
+      <table class="roles-table" id="rolesTable">
+        <thead>
+          <tr>
+            <th class="col-role">Role Description</th>
+            <th class="col-people">Attendees</th>
+            <th class="col-rate">Hourly Rate ($)</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody id="rolesBody">
+          <!-- Populated by script -->
+        </tbody>
+      </table>
+
+      <button id="addRoleBtn" class="btn btn-secondary">+ Add Another Role</button>
+
+      <!-- Alert Box -->
+      <div id="noticeBox" class="notice"></div>
+
+      <!-- Real-Time Results -->
+      <div class="results-grid">
+        <div class="result-box highlight">
+          <div class="result-label">Total Meeting Cost</div>
+          <div class="result-value" id="totalCostDisplay">$0.00</div>
+        </div>
+        <div class="result-box">
+          <div class="result-label">Cost Per Minute</div>
+          <div class="result-value" id="costPerMinuteDisplay">$0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live "Meeting So Far" Mode (Bonus Challenge) -->
+    <div class="live-mode-card" id="liveTickerCard">
+      <div class="live-title">
+        <span class="pulse-dot"></span>
+        <span>Live Meeting Ticker</span>
+      </div>
+      <div>
+        <button id="liveToggleBtn" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Start Timer</button>
+      </div>
+      <div style="font-size: 0.9rem; color: #166534;">
+        Elapsed: <strong id="liveElapsed">00:00</strong> &bull; Accrued: <strong id="liveCost" class="live-cost">$0.00</strong>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Pure Offline HTML5/CSS/JS &bull; Handled strictly in integer cents &bull; Round-half-up</p>
+      <p style="margin-top: 6px;"><a href="tests.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Open Automated In-Browser Test Suite &rarr;</a></p>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Exact Money Calculation Engine
+     * 1. Never use floating point dollars.
+     * 2. Rates parsed into integer cents: dollars * 100.
+     * 3. Total cents = Math.round((total_hourly_rate_cents * minutes) / 60).
+     * 4. Cost per minute = Math.round(total_hourly_rate_cents / 60) if minutes > 0 else 0.
+     * 5. Half-cents round up to nearest cent (Round Half Up).
+     */
+
+    // Initial 3 rows
+    let rolesData = [
+      { name: "Consultant", attendees: 6, rate: "85.00" },
+      { name: "Project Manager", attendees: 0, rate: "0.00" },
+      { name: "Engineer", attendees: 0, rate: "0.00" }
+    ];
+
+    const rolesBody = document.getElementById("rolesBody");
+    const meetingMinutesInput = document.getElementById("meetingMinutes");
+    const totalCostDisplay = document.getElementById("totalCostDisplay");
+    const costPerMinuteDisplay = document.getElementById("costPerMinuteDisplay");
+    const noticeBox = document.getElementById("noticeBox");
+    const addRoleBtn = document.getElementById("addRoleBtn");
+
+    // Live ticker variables
+    let liveTimer = null;
+    let liveSeconds = 0;
+    const liveToggleBtn = document.getElementById("liveToggleBtn");
+    const liveElapsed = document.getElementById("liveElapsed");
+    const liveCost = document.getElementById("liveCost");
+
+    /**
+     * Parse dollar string to exact integer cents
+     */
+    function parseDollarsToCents(val) {
+      if (val === null || val === undefined) return 0;
+      let str = String(val).trim().replace(/^\$/, "").replace(/,/g, "");
+      if (!str) return 0;
+      let num = parseFloat(str);
+      if (isNaN(num)) throw new Error("Invalid rate");
+      if (num < 0) throw new Error("Negative rate");
+      return Math.round(num * 100);
+    }
+
+    /**
+     * Format integer cents into currency string with commas
+     */
+    function formatCents(cents) {
+      if (cents < 0) cents = 0;
+      let dollars = Math.floor(cents / 100);
+      let remCents = cents % 100;
+      let formattedDollars = dollars.toLocaleString("en-US");
+      return "$" + formattedDollars + "." + (remCents < 10 ? "0" : "") + remCents;
+    }
+
+    /**
+     * Render role rows in DOM
+     */
+    function renderRows() {
+      rolesBody.innerHTML = "";
+      rolesData.forEach((role, idx) => {
+        const tr = document.createElement("tr");
+        tr.className = "role-row";
+        tr.innerHTML = `
+          <td class="col-role">
+            <input type="text" class="input-field role-name" value="${role.name}" placeholder="e.g. Director" data-idx="${idx}">
+          </td>
+          <td class="col-people">
+            <input type="number" class="input-field role-attendees" value="${role.attendees}" min="0" step="1" data-idx="${idx}">
+          </td>
+          <td class="col-rate">
+            <input type="text" class="input-field role-rate" value="${role.rate}" placeholder="0.00" data-idx="${idx}">
+          </td>
+          <td class="col-action">
+            ${rolesData.length > 1 ? `<button type="button" class="btn-danger-icon" data-del="${idx}" title="Delete row">&times;</button>` : ''}
+          </td>
+        `;
+        rolesBody.appendChild(tr);
+      });
+      calculate();
+    }
+
+    /**
+     * Main recalculation function
+     */
+    function calculate() {
+      noticeBox.className = "notice";
+      noticeBox.textContent = "";
+
+      let rawMinutes = meetingMinutesInput.value;
+      if (rawMinutes === "" || isNaN(rawMinutes)) {
+        noticeBox.className = "notice error";
+        noticeBox.textContent = "Please enter a valid number of meeting minutes.";
+        totalCostDisplay.textContent = "$0.00";
+        costPerMinuteDisplay.textContent = "$0.00";
+        return;
+      }
+
+      let minutes = parseInt(rawMinutes, 10);
+      if (minutes < 0) {
+        noticeBox.className = "notice error";
+        noticeBox.textContent = "Meeting duration cannot be negative.";
+        totalCostDisplay.textContent = "$0.00";
+        costPerMinuteDisplay.textContent = "$0.00";
+        return;
+      }
+
+      let totalHourlyRateCents = 0;
+      let totalAttendees = 0;
+      let hasError = false;
+
+      // Extract current row values
+      const nameInputs = document.querySelectorAll(".role-name");
+      const attendeesInputs = document.querySelectorAll(".role-attendees");
+      const rateInputs = document.querySelectorAll(".role-rate");
+
+      for (let i = 0; i < attendeesInputs.length; i++) {
+        let nameVal = nameInputs[i].value.trim();
+        let attendeesVal = attendeesInputs[i].value;
+        let rateVal = rateInputs[i].value;
+
+        let people = parseInt(attendeesVal, 10);
+        if (isNaN(people) || people < 0) {
+          noticeBox.className = "notice error";
+          noticeBox.textContent = "Attendee counts must be non-negative whole numbers.";
+          hasError = true;
+          break;
+        }
+
+        let rateCents = 0;
+        try {
+          rateCents = parseDollarsToCents(rateVal);
+        } catch (e) {
+          noticeBox.className = "notice error";
+          noticeBox.textContent = "Hourly rates must be valid positive numbers.";
+          hasError = true;
+          break;
+        }
+
+        totalAttendees += people;
+        totalHourlyRateCents += (people * rateCents);
+      }
+
+      if (hasError) {
+        totalCostDisplay.textContent = "$0.00";
+        costPerMinuteDisplay.textContent = "$0.00";
+        return;
+      }
+
+      // Check upper limit thresholds
+      if (minutes > 1440) {
+        noticeBox.className = "notice warning";
+        noticeBox.textContent = "Notice: Meeting duration exceeds 24 hours. Ensure inputs reflect an all-day offsite.";
+      } else if (totalAttendees > 500) {
+        noticeBox.className = "notice warning";
+        noticeBox.textContent = "Notice: Large meeting (" + totalAttendees + " attendees). Figures reflect all-hands scale.";
+      }
+
+      // 0-minute or 0-attendee cases: NEVER NaN or Infinity
+      if (minutes === 0 || totalHourlyRateCents === 0) {
+        totalCostDisplay.textContent = "$0.00";
+        costPerMinuteDisplay.textContent = "$0.00";
+        return;
+      }
+
+      // Exact integer cents arithmetic (Round Half Up)
+      let totalCostCents = Math.round((totalHourlyRateCents * minutes) / 60);
+      let costPerMinuteCents = Math.round(totalHourlyRateCents / 60);
+
+      totalCostDisplay.textContent = formatCents(totalCostCents);
+      costPerMinuteDisplay.textContent = formatCents(costPerMinuteCents);
+
+      updateLiveCost(totalHourlyRateCents);
+    }
+
+    // Dynamic row addition & deletion
+    addRoleBtn.addEventListener("click", () => {
+      rolesData.push({ name: "", attendees: 1, rate: "50.00" });
+      renderRows();
+    });
+
+    rolesBody.addEventListener("click", (e) => {
+      if (e.target.hasAttribute("data-del")) {
+        let idx = parseInt(e.target.getAttribute("data-del"), 10);
+        rolesData.splice(idx, 1);
+        renderRows();
+      }
+    });
+
+    // Reactive input updates
+    rolesBody.addEventListener("input", (e) => {
+      let idx = e.target.getAttribute("data-idx");
+      if (idx !== null) {
+        if (e.target.classList.contains("role-name")) rolesData[idx].name = e.target.value;
+        if (e.target.classList.contains("role-attendees")) rolesData[idx].attendees = e.target.value;
+        if (e.target.classList.contains("role-rate")) rolesData[idx].rate = e.target.value;
+      }
+      calculate();
+    });
+
+    meetingMinutesInput.addEventListener("input", calculate);
+
+    // Live Ticker Mode Implementation
+    liveToggleBtn.addEventListener("click", () => {
+      if (liveTimer) {
+        clearInterval(liveTimer);
+        liveTimer = null;
+        liveToggleBtn.textContent = "Resume Timer";
+      } else {
+        liveToggleBtn.textContent = "Pause Timer";
+        liveTimer = setInterval(() => {
+          liveSeconds++;
+          let mins = Math.floor(liveSeconds / 60);
+          let secs = liveSeconds % 60;
+          liveElapsed.textContent = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+          calculate();
+        }, 1000);
+      }
+    });
+
+    function updateLiveCost(hourlyRateCents) {
+      if (!liveTimer && liveSeconds === 0) {
+        liveCost.textContent = "$0.00";
+        return;
+      }
+      // Accrue per second
+      let accruedCents = Math.round((hourlyRateCents * liveSeconds) / 3600);
+      liveCost.textContent = formatCents(accruedCents);
+    }
+
+    // Initial render
+    renderRows();
+  </script>
+</body>
+</html>

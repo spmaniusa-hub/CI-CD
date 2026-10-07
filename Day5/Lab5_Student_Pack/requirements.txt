@@ -1,0 +1,8 @@
+Inventory reservation requirements
+
+1. A positive request must succeed when requested quantity is less than OR EQUAL TO free stock.
+2. A request greater than free stock must return False and must not change state.
+3. Zero or negative requests must raise ValueError.
+4. Reserved stock must never exceed available stock.
+5. Release quantity must be positive and cannot exceed the currently reserved quantity.
+6. Business rule not obvious from the implementation: reservations that consume all free stock are allowed, but the SKU must then be reported as out_of_stock in any generated summary.

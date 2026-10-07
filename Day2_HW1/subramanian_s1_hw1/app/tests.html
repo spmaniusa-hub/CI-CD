@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Meeting Cost Calculator — Automated In-Browser Test Suite</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 32px 16px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    p { color: #64748b; margin-bottom: 24px; }
+    .test-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .test-name { font-weight: 600; font-size: 0.95rem; }
+    .test-details { font-size: 0.82rem; color: #64748b; margin-top: 4px; }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .summary-card {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 18px;
+      margin-top: 24px;
+      font-weight: 700;
+      color: #1e40af;
+      text-align: center;
+    }
+    a { color: #2563eb; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>Automated In-Browser Test Suite</h1>
+  <p>Verifying exact-to-the-cent arithmetic against Day 2 Homework 1 Success Criteria.</p>
+
+  <div id="testResultsContainer"></div>
+  <div id="summaryCard" class="summary-card">Running tests...</div>
+
+  <p style="margin-top: 24px; text-align: center;">
+    <a href="index.html">&larr; Back to Meeting Cost Calculator</a>
+  </p>
+
+  <script>
+    function parseDollarsToCents(val) {
+      if (val === null || val === undefined) return 0;
+      let str = String(val).trim().replace(/^\$/, "").replace(/,/g, "");
+      if (!str) return 0;
+      let num = parseFloat(str);
+      if (isNaN(num)) throw new Error("Invalid rate");
+      return Math.round(num * 100);
+    }
+
+    function formatCents(cents) {
+      if (cents < 0) cents = 0;
+      let dollars = Math.floor(cents / 100);
+      let remCents = cents % 100;
+      let formattedDollars = dollars.toLocaleString("en-US");
+      return "$" + formattedDollars + "." + (remCents < 10 ? "0" : "") + remCents;
+    }
+
+    function calculate(roles, minutes) {
+      let totalHourlyRateCents = 0;
+      roles.forEach(r => {
+        totalHourlyRateCents += (r.attendees * parseDollarsToCents(r.rate));
+      });
+      if (minutes === 0 || totalHourlyRateCents === 0) {
+        return { total: "$0.00", perMinute: "$0.00", totalCents: 0, perMinCents: 0 };
+      }
+      let totalCents = Math.round((totalHourlyRateCents * minutes) / 60);
+      let perMinCents = Math.round(totalHourlyRateCents / 60);
+      return {
+        total: formatCents(totalCents),
+        perMinute: formatCents(perMinCents),
+        totalCents: totalCents,
+        perMinCents: perMinCents
+      };
+    }
+
+    const testCases = [
+      {
+        id: "SC1",
+        name: "Success Criteria 1: Standard Consulting Meeting",
+        run: () => {
+          let res = calculate([{ attendees: 6, rate: 85.00 }], 45);
+          return res.total === "$382.50" && res.perMinute === "$8.50";
+        },
+        expected: "Total: $382.50, Per Min: $8.50",
+        details: "6 people @ $85.00/hr for 45 minutes"
+      },
+      {
+        id: "SC2",
+        name: "Success Criteria 2: Large Meeting & Comma Formatting",
+        run: () => {
+          let res = calculate([{ attendees: 120, rate: 150.00 }], 480);
+          return res.total === "$144,000.00" && res.perMinute === "$300.00";
+        },
+        expected: "Total: $144,000.00 (with comma)",
+        details: "120 people @ $150.00/hr for 8 hours (480 mins)"
+      },
+      {
+        id: "SC3",
+        name: "Success Criteria 3: Fractional Cent (1,662.5 cents)",
+        run: () => {
+          let res = calculate([{ attendees: 3, rate: 47.50 }], 7);
+          return res.totalCents === 1663 && res.total === "$16.63" && res.perMinute === "$2.38";
+        },
+        expected: "Total: $16.63 (1,663 cents, Round-Half-Up)",
+        details: "3 people @ $47.50/hr for 7 minutes"
+      },
+      {
+        id: "SC4",
+        name: "Zero Minutes Division Safeguard",
+        run: () => {
+          let res = calculate([{ attendees: 5, rate: 120.00 }], 0);
+          return res.total === "$0.00" && res.perMinute === "$0.00" && !res.perMinute.includes("NaN") && !res.perMinute.includes("Infinity");
+        },
+        expected: "Total: $0.00, Per Min: $0.00 (no NaN/Infinity)",
+        details: "5 people @ $120.00/hr for 0 minutes"
+      },
+      {
+        id: "SC5",
+        name: "Zero Attendees Empty Table Safeguard",
+        run: () => {
+          let res = calculate([{ attendees: 0, rate: 100.00 }], 60);
+          return res.total === "$0.00" && res.perMinute === "$0.00";
+        },
+        expected: "Total: $0.00, Per Min: $0.00",
+        details: "0 attendees @ $100.00/hr for 60 minutes"
+      },
+      {
+        id: "SC6",
+        name: "Multi-Role Real World Sierra Trails Committee",
+        run: () => {
+          let res = calculate([
+            { attendees: 1, rate: 120.00 }, // Chair
+            { attendees: 4, rate: 75.00 },  // Planners
+            { attendees: 4, rate: 50.00 }   // Guides
+          ], 90);
+          // Total rate = 120 + 300 + 200 = $620.00/hr = 62000 cents/hr
+          // 90 mins: 62000 * 90 / 60 = 93000 cents = $930.00
+          // Per min: 62000 / 60 = 1033.33 -> 1033 cents = $10.33
+          return res.total === "$930.00" && res.perMinute === "$10.33";
+        },
+        expected: "Total: $930.00, Per Min: $10.33",
+        details: "9 people across 3 tiers for 90 minutes"
+      }
+    ];
+
+    const container = document.getElementById("testResultsContainer");
+    let passedCount = 0;
+
+    testCases.forEach(tc => {
+      let passed = false;
+      try {
+        passed = tc.run();
+      } catch (e) {
+        passed = false;
+      }
+
+      if (passed) passedCount++;
+
+      const card = document.createElement("div");
+      card.className = "test-card";
+      card.innerHTML = `
+        <div>
+          <div class="test-name">${tc.name}</div>
+          <div class="test-details">${tc.details} &bull; Expected: ${tc.expected}</div>
+        </div>
+        <span class="badge ${passed ? 'badge-pass' : 'badge-fail'}">
+          ${passed ? 'PASS' : 'FAIL'}
+        </span>
+      `;
+      container.appendChild(card);
+    });
+
+    const summary = document.getElementById("summaryCard");
+    if (passedCount === testCases.length) {
+      summary.style.background = "#dcfce7";
+      summary.style.borderColor = "#86efac";
+      summary.style.color = "#166534";
+      summary.innerHTML = `&#x2714; All ${passedCount}/${testCases.length} Automatic Checks PASSED (All Green)`;
+    } else {
+      summary.style.background = "#fee2e2";
+      summary.style.borderColor = "#fca5a5";
+      summary.style.color = "#991b1b";
+      summary.textContent = `${passedCount}/${testCases.length} Tests Passed.`;
+    }
+  </script>
+</body>
+</html>

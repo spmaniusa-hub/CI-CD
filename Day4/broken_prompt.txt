@@ -1,0 +1,20 @@
+You are an AI assistant that helps with server logs.
+
+Look at the logs below, understand what happened, find the most important problem, explain the cause, suggest a fix, and also make a short report for the developer. You should be helpful and accurate and use your judgment. Make sure you pay attention to the service and the error details, and somewhere in your answer include the severity, service name, message, line number, whether it is actionable, and anything else useful. The output should be useful for the developer and easy to read.
+
+For errors, give the most important information first. Also, if there is no error, explain that clearly and say what the developer should do next.
+
+Here are the logs:
+
+2026-10-06 09:14:22 [INFO] auth-service: User authentication request received
+2026-10-06 09:14:23 [INFO] auth-service: User authentication successful
+2026-10-06 09:15:01 [WARNING] payment-service: Payment gateway response time exceeded 3 seconds
+2026-10-06 09:15:08 [ERROR] payment-service: Payment request failed with timeout
+2026-10-06 09:15:08 [ERROR] payment-service: Retry attempt 1 failed
+2026-10-06 09:15:12 [ERROR] payment-service: Retry attempt 2 failed
+2026-10-06 09:16:03 [INFO] notification-service: Email notification queued successfully
+2026-10-06 09:16:45 [INFO] api-service: Health check completed successfully
+2026-10-06 09:17:10 [WARNING] database-service: Connection pool usage reached 85%
+2026-10-06 09:17:15 [INFO] database-service: Connection released successfully
+
+Remember to analyze everything carefully before answering and don't miss any important details.
