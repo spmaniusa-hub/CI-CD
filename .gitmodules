@@ -1,0 +1,3 @@
+[submodule "Day1/FairShare"]
+	path = Day1/FairShare
+	url = https://github.com/spmaniusa-hub/FairShare.git
